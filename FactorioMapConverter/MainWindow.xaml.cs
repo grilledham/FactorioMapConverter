@@ -32,6 +32,61 @@ namespace FactorioMapConverter
         {
             InitializeComponent();
             Init();
+
+            PrintTileDatas();
+        }
+
+        private void PrintTileDatas()
+        {
+            var path = System.IO.Path.Combine(Environment.CurrentDirectory, "Assets", "Tiles");
+            var files = Directory.GetFiles(path);
+
+            int number = 3;
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var file in files)
+            {
+                var name = System.IO.Path.GetFileNameWithoutExtension(file);
+
+                BitmapImage image = new BitmapImage(new Uri(file, UriKind.Absolute));
+
+                FormatConvertedBitmap dec = new FormatConvertedBitmap();
+                dec.BeginInit();
+                dec.Source = image;
+                dec.DestinationFormat = PixelFormats.Bgra32;
+                dec.EndInit();
+
+                int height = dec.PixelHeight;
+                int width = dec.PixelWidth;
+                int stride = width * 4;
+                int pixels = height * width;
+                var bytes = new byte[pixels * 4];
+                dec.CopyPixels(bytes, stride, 0);
+
+
+                int sumB = 0;
+                int sumG = 0;
+                int sumR = 0;
+
+                for (int i = 0; i < bytes.Length; i += 4)
+                {
+                    sumB += bytes[i];
+                    sumG += bytes[i + 1];
+                    sumR += bytes[i + 2];
+                }
+
+                int b = sumB / pixels;
+                int g = sumG / pixels;
+                int r = sumR / pixels;
+
+                //sb.AppendLine($"name = \"{name}\", colorRGB = {r},{g},{b}");
+                //sb.AppendLine($"[{number}] = \"{name}\",");
+                sb.AppendLine($"new TileData() {{name = \"{name}\", Number = {number}, color = Color.FromArgb(255,{r},{g},{b}), enabled = true}},");
+                number++;
+            }
+
+            Debug.WriteLine(sb.ToString());
+
         }
 
         private void Init()
@@ -65,7 +120,7 @@ namespace FactorioMapConverter
             dlg.AddExtension = true;
             dlg.DefaultExt = ".lua";
             dlg.Filter = "lua file|*.lua";
-            
+
 
             if (dlg.ShowDialog() is true)
             {
@@ -115,7 +170,7 @@ namespace FactorioMapConverter
             }
 
             enabledTiles = tiles.Where(x => x.Enabled).ToList();
-            
+
             string data = await Task.Run(() => DecodeImageAndCompress(imageFile, tileGetter));
 
             using (FileStream SourceStream = File.Open(outputFile, FileMode.Create))
