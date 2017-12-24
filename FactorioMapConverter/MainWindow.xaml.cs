@@ -33,7 +33,7 @@ namespace FactorioMapConverter
             InitializeComponent();
             Init();
 
-            PrintTileDatas();
+            //PrintTileDatas();
         }
 
         private void PrintTileDatas()
