@@ -79,9 +79,9 @@ namespace FactorioMapConverter
                 int g = sumG / pixels;
                 int r = sumR / pixels;
 
-                //sb.AppendLine($"name = \"{name}\", colorRGB = {r},{g},{b}");
+                sb.AppendLine($"name = \"{name}\", colorRGB = {r},{g},{b}");
                 //sb.AppendLine($"[{number}] = \"{name}\",");
-                sb.AppendLine($"new TileData() {{name = \"{name}\", Number = {number}, color = Color.FromArgb(255,{r},{g},{b}), enabled = true}},");
+                //sb.AppendLine($"new TileData() {{name = \"{name}\", Number = {number}, color = Color.FromArgb(255,{r},{g},{b}), enabled = true}},");
                 number++;
             }
 
@@ -204,7 +204,8 @@ namespace FactorioMapConverter
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("return {");
+            sb.AppendLine("local b = require 'map_gen.shared.builders'");
+            sb.AppendLine("return b.decompress({");
             sb.Append("height = ").Append(height).AppendLine(",");
             sb.Append("width = ").Append(width).AppendLine(",");
             sb.AppendLine("data = {");
@@ -251,7 +252,7 @@ namespace FactorioMapConverter
             }
 
             sb.AppendLine("}");
-            sb.Append("}");
+            sb.Append("})");
 
             return sb.ToString();
         }
@@ -271,6 +272,72 @@ namespace FactorioMapConverter
                 int bd = c.B - b;
 
                 int dd = rd * rd + gd * gd + bd * bd;
+
+                if (dd < min)
+                {
+                    min = dd;
+                    minTile = tile;
+                }
+            }
+
+            return minTile;
+        }
+
+        private (double x, double y, double z) ApplyHCL(int r, int g, int b)
+        {
+            double varR = r / 255.0;
+            double varG = g / 255.0;
+            double varB = b / 255.0;
+
+            double varMin = Math.Min(Math.Min(varR, varG), varB);
+            double varMax = Math.Max(Math.Max(varR, varG), varB);
+            double C = varMax - varMin;
+
+            double L = (varMax + varMin) - 1;
+
+            double delR = (((varMax - varR) / 6) + (C / 2)) / C;
+            double delG = (((varMax - varG) / 6) + (C / 2)) / C;
+            double delB = (((varMax - varB) / 6) + (C / 2)) / C;
+
+            double H;
+
+            if (varR == varMax)
+                H = delB - delG;
+            else if (varG == varMax)
+                H = (1 / 3) + delR - delB;
+            else
+                H = (2 / 3) + delG - delR;
+
+            if (H < 0)
+                H++;
+            if (H > 1)
+                H--;
+
+            H = 2 * H;
+
+            double x = C * Math.Cos(H * Math.PI);
+            double y = C * Math.Sin(H * Math.PI);
+
+            return (x, y, L);
+        }
+
+        private TileData GetTileNameOfColor2(int r, int g, int b, int a)
+        {
+            var target = ApplyHCL(r, g, b);
+
+            double min = double.MaxValue;
+            TileData minTile = null;
+            foreach (var tile in enabledTiles)
+            {
+                var c = tile.Color;
+
+                var tc = ApplyHCL(c.R, c.G, c.B);
+
+                double xx = tc.x - target.x;
+                double yy = tc.y - target.y;
+                double zz = tc.z - target.z;
+
+                double dd = xx * xx + yy * yy + zz * zz;
 
                 if (dd < min)
                 {
