@@ -92,7 +92,7 @@ namespace FactorioMapConverter
         private void Init()
         {
             ProcessImageButton.IsEnabled = false;
-            ProcessImageProgress.Visibility = Visibility.Hidden;
+            ProcessImageProgress.IsEnabled = false;
 
             tiles = TileData.Tiles;
 
@@ -153,6 +153,7 @@ namespace FactorioMapConverter
             }
 
             ProcessImageProgress.Visibility = Visibility.Visible;
+            Status.Visibility = Visibility.Collapsed;
             ProcessImageProgress.IsIndeterminate = true;
             ProcessImageButton.IsEnabled = false;
             GetImageFileButton.IsEnabled = false;
@@ -179,11 +180,14 @@ namespace FactorioMapConverter
                 await SourceStream.WriteAsync(Encoding.ASCII.GetBytes(data), 0, data.Length);
             }
 
-            ProcessImageProgress.Visibility = Visibility.Hidden;
+            ProcessImageProgress.Visibility = Visibility.Collapsed;
+            Status.Visibility = Visibility.Visible;
             ProcessImageProgress.IsIndeterminate = false;
             ProcessImageButton.IsEnabled = true;
             GetImageFileButton.IsEnabled = true;
-            SetOutputFileButton.IsEnabled = true;
+            SetOutputFileButton.IsEnabled = true;;
+
+            Status.Text = "Conversion Performed";
         }
 
         private string DecodeImageAndCompress(string file, Func<int, int, int, int, TileData> tileGetter)
