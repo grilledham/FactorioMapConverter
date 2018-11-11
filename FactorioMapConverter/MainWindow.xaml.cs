@@ -153,11 +153,12 @@ namespace FactorioMapConverter
             }
 
             ProcessImageProgress.Visibility = Visibility.Visible;
-            Status.Visibility = Visibility.Collapsed;
             ProcessImageProgress.IsIndeterminate = true;
             ProcessImageButton.IsEnabled = false;
             GetImageFileButton.IsEnabled = false;
             SetOutputFileButton.IsEnabled = false;
+            Status.Visibility = Visibility.Collapsed;
+            Status.Text = string.Empty;
 
             Func<int, int, int, int, TileData> tileGetter;
             if (BlackAndWhiteRadioButton.IsChecked is true)
@@ -172,22 +173,36 @@ namespace FactorioMapConverter
 
             enabledTiles = tiles.Where(x => x.Enabled).ToList();
 
-            string data = await Task.Run(() => DecodeImageAndCompress(imageFile, tileGetter));
-
-            using (FileStream SourceStream = File.Open(outputFile, FileMode.Create))
+            string data;
+            try
             {
-                SourceStream.Seek(0, SeekOrigin.Begin);
-                await SourceStream.WriteAsync(Encoding.ASCII.GetBytes(data), 0, data.Length);
+                data = await Task.Run(() => DecodeImageAndCompress(imageFile, tileGetter));
+
+                using (FileStream SourceStream = File.Open(outputFile, FileMode.Create))
+                {
+                    SourceStream.Seek(0, SeekOrigin.Begin);
+                    await SourceStream.WriteAsync(Encoding.ASCII.GetBytes(data), 0, data.Length);
+                }
+
+                Status.Text = "Conversion Performed";
             }
+            catch (Exception exc)
+            {
+                MessageBox.Show(
+                    $"Invalid operation upon selected file: \r\n{exc.Message}\r\n\r\n Is the selected file an image file?",
+                    "Error during image decoding", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            finally
+            {
 
-            ProcessImageProgress.Visibility = Visibility.Collapsed;
-            Status.Visibility = Visibility.Visible;
-            ProcessImageProgress.IsIndeterminate = false;
-            ProcessImageButton.IsEnabled = true;
-            GetImageFileButton.IsEnabled = true;
-            SetOutputFileButton.IsEnabled = true;;
-
-            Status.Text = "Conversion Performed";
+                ProcessImageProgress.Visibility = Visibility.Collapsed;
+                Status.Visibility = Visibility.Visible;
+                ProcessImageProgress.IsIndeterminate = false;
+                ProcessImageButton.IsEnabled = true;
+                GetImageFileButton.IsEnabled = true;
+                SetOutputFileButton.IsEnabled = true;
+            }
         }
 
         private string DecodeImageAndCompress(string file, Func<int, int, int, int, TileData> tileGetter)
