@@ -5,57 +5,86 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FactorioMapConverter"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid >
+        Title="Factorio Map Converter" Height="500" Width="800" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="10,2,10,2"></Setter>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,5,10,5"></Setter>
+            <Setter Property="VerticalAlignment" Value="Center"></Setter>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalAlignment" Value="Center"></Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="Tiles (not used for black and white mode)" Margin="10" />
-        <Grid Name="TilesGrid" Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
-            <ListView Name="TilesView" Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="10">
-                <ListView.ItemTemplate>
-                    <DataTemplate >
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" Content="{Binding Name, Mode=OneTime}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <StackPanel Grid.Row="1">                
+        <GroupBox Header="Tiles (not used for black and white mode)">
+            <Grid Name="TilesGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <ListView Name="TilesView" Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto" >
+                    <ListView.ItemTemplate>
+                        <DataTemplate >
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" Content="{Binding Name, Mode=OneTime}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <StackPanel Grid.Row="1">
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="1" Header="Picture Mode">
+            <StackPanel>
+                <RadioButton Name="BlackAndWhiteRadioButton" Content="Black and white" IsChecked="True" Margin="0,0,0,5" />
+                <RadioButton Name="ColorRadioButton" Content="Color" />
             </StackPanel>
-        </Grid>
-        <StackPanel Grid.Row="2" Margin="10">
-            <TextBlock Text="Picture Mode" />
-            <RadioButton Name="BlackAndWhiteRadioButton" Content="Black and white" IsChecked="True" />
-            <RadioButton Name="ColorRadioButton" Content="Color" />
-        </StackPanel>
-        <Grid Grid.Row="3" Margin="10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Name="ImageFilePathTextBlock" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" />
-            <TextBlock Name="OutputFilePathTextBlock" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" />
-            <Button Name="GetImageFileButton" Grid.Row="0" Grid.Column="0" Content="Get image"
+        </GroupBox>
+        <GroupBox Header="Files" Grid.Row="2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock>Image for Import:</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0">Map File for Export:</TextBlock>
+                <TextBox Name="ImageFilePathTextBlock" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center"/>
+                <TextBox Name="OutputFilePathTextBlock" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"/>
+                <Button Name="GetImageFileButton" Grid.Row="0" Grid.Column="2" Content="Search..."
                     HorizontalAlignment="Right" Click="GetImageFileButton_Click" Margin="5" />
-            <Button Name="SetOutputFileButton" Grid.Row="1" Grid.Column="0" Content="Set output file"
+                <Button Name="SetOutputFileButton" Grid.Row="1" Grid.Column="2" Content="Search..."
                     HorizontalAlignment="Right" Click="SetOutputFileButton_Click" Margin="5"/>
-            <Button Name="ProcessImageButton" Grid.Row="2" Grid.Column="0" Content="Process Image"
-                    Click="ProcessImageButton_Click" Margin="5"/>            
-            <ProgressBar Name="ProcessImageProgress" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="5"/>
-        </Grid>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Convert" Grid.Row="3">
+            <StackPanel>
+                <Button Name="ProcessImageButton" Content="Perform Conversion"
+                Click="ProcessImageButton_Click" Margin="5"/>
+            </StackPanel>
+        </GroupBox>
+        <StatusBar Grid.Row="4" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch">
+            <StatusBarItem HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="20">
+                <StackPanel HorizontalAlignment="Stretch">
+                    <ProgressBar Name="ProcessImageProgress" VerticalAlignment="Stretch" Height="10" Visibility="Collapsed" HorizontalAlignment="Stretch" />
+                    <TextBlock x:Name="Status" Margin="10,0,0,0" />
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
