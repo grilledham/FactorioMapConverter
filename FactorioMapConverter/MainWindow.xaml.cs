@@ -320,12 +320,12 @@ namespace FactorioMapConverter
 
             double H;
 
-            if (varR == varMax)
+            if (Math.Abs(varR - varMax) < float.Epsilon)
                 H = delB - delG;
-            else if (varG == varMax)
-                H = (1 / 3) + delR - delB;
+            else if (Math.Abs(varG - varMax) < float.Epsilon)
+                H = (1.0 / 3.0) + delR - delB;
             else
-                H = (2 / 3) + delG - delR;
+                H = (2.0 / 3.0) + delG - delR;
 
             if (H < 0)
                 H++;
